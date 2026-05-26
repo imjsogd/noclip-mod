@@ -1,4 +1,4 @@
-name: Build Noclip! Mod
+name: Build Bums! Mod
 
 on:
   push:
@@ -21,9 +21,12 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-      - name: Build the mod
+      - name: Setup Geode SDK
         uses: geode-sdk/build-geode-mod@main
         id: build
         with:
@@ -33,5 +36,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Noclip-${{ matrix.config.name }}
+          name: Bums-${{ matrix.config.name }}-geode
           path: ${{ steps.build.outputs.build-output }}
