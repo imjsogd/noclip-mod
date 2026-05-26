@@ -1,0 +1,37 @@
+name: Build Noclip! Mod
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        config:
+          - name: Android
+            os: ubuntu-latest
+            target: Android64
+          - name: Windows
+            os: windows-latest
+            target: Win64
+
+    name: Build (${{ matrix.config.name }})
+    runs-on: ${{ matrix.config.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the mod
+        uses: geode-sdk/build-geode-mod@main
+        id: build
+        with:
+          target: ${{ matrix.config.target }}
+          build-config: Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Noclip-${{ matrix.config.name }}
+          path: ${{ steps.build.outputs.build-output }}
