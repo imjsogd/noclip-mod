@@ -1,40 +1,57 @@
-name: Build Bums! Mod
+name: Build Geode Mod
 
 on:
-  push:
-    branches: [ main, master ]
   workflow_dispatch:
+  push:
+    branches:
+      - "**"
 
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         config:
-          - name: Android
-            os: ubuntu-latest
-            target: Android64
           - name: Windows
             os: windows-latest
-            target: Win64
 
-    name: Build (${{ matrix.config.name }})
+          - name: macOS
+            os: macos-latest
+
+          - name: iOS
+            os: macos-latest
+            target: iOS
+
+          - name: Android64
+            os: ubuntu-latest
+            target: Android64
+
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      - uses: actions/checkout@v4
 
-      - name: Setup Geode SDK
+      - name: Build the mod
         uses: geode-sdk/build-geode-mod@main
-        id: build
         with:
+          combine: true
           target: ${{ matrix.config.target }}
-          build-config: Release
 
-      - name: Upload artifact
+  package:
+    name: Package all platforms
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Combine into single .geode file
+        uses: geode-sdk/build-geode-mod/combine@main
+        id: build
+
+      - name: Upload .geode artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Bums-${{ matrix.config.name }}-geode
+          name: noclip-geode
           path: ${{ steps.build.outputs.build-output }}
